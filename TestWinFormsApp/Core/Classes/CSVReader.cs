@@ -7,10 +7,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TestWinFormsApp.Core.Interfaces;
+using TestWinFormsApp.Properties;
 
 namespace TestWinFormsApp.Core.Classes
 {
-    public class CSVReader<T> : IReader<T> where T : class
+    public class CSVReader: IReader<Passenger>
     {
         string FilePath = string.Empty;
 
@@ -19,9 +20,9 @@ namespace TestWinFormsApp.Core.Classes
             FilePath = filePath;
         }
 
-        public List<T> ReadData()
+        public List<Passenger> ReadData()
         {
-            List<T> resultList = new();
+            List<Passenger> resultList = new();
             List<string> errorLines = new();
 
             if(FilePath is null)
@@ -29,7 +30,7 @@ namespace TestWinFormsApp.Core.Classes
 
             if (!File.Exists(FilePath))
             {
-                MessageBox.Show("Файл не найден.", "Ошибка обработки файла");
+                MessageBox.Show(Resources.FileNotFound_Message, Resources.FileNotFound_Caption);
                 return resultList;
             }
 
@@ -39,7 +40,12 @@ namespace TestWinFormsApp.Core.Classes
             {
                 try
                 {
-                    var item = (T)Activator.CreateInstance(typeof(T), line.Split(";"));
+                    var dataObj = line.Split(";");
+
+                    if (!Passenger.Validate(dataObj))
+                        throw new ArgumentException("Не пройдена валидация.");
+
+                    var item = new Passenger(dataObj);
 
                     if(item is not null)
                         resultList.Add(item);
@@ -54,16 +60,16 @@ namespace TestWinFormsApp.Core.Classes
             {
 
                 var errorDialog = MessageBox.Show(
-                                            $"Во время обработки данных {errorLines.Count} имели неверный формат данных. Сохранить его?",
-                                            "Ошибка обработки файла", 
+                                            string.Format(Resources.FileProcessingError_Message, errorLines.Count),
+                                            Resources.FileProcessingError_Caption, 
                                             MessageBoxButtons.OKCancel);
 
                 if(errorDialog == DialogResult.OK)
                 {
                     var errorFileName = SaveErrorLinesToFile(errorLines, FilePath);
-                    MessageBox.Show($"Файл сохранен в той же директории в файле \"{errorFileName}\"",
-                                            "Сохранение ошибок",
-                                            MessageBoxButtons.OK);
+                    MessageBox.Show(string.Format(Resources.ErrorFileSave_Message,errorFileName),
+                                    Resources.ErrorFileSave_Caption,
+                                    MessageBoxButtons.OK);
                 }
             }
 

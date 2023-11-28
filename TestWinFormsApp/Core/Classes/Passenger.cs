@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using TestWinFormsApp.Core.Interfaces;
 
 namespace TestWinFormsApp.Core.Classes
 {
@@ -18,26 +19,6 @@ namespace TestWinFormsApp.Core.Classes
 
         public Passenger(params string[] values)
         {
-            if (values.Length != 5)
-            {
-                throw new ArgumentException("Ожидалось 5 значений.");
-            }
-
-            if (!DateTime.TryParse(values[0], out DateTime departureTime))
-            {
-                throw new ArgumentException("Неверный формат даты и времени.");
-            }
-
-            if (!ValidateFlightNumber(values[1]))
-            {
-                throw new ArgumentException("Неверный формат номера рейса.");
-            }
-
-            if (!ValidatePassengerData(values[2], values[3], values[4]))
-            {
-                throw new ArgumentException("Неверный формат данных пассажира.");
-            }
-
             DepartureTime = DateTime.Parse(values[0]);
             FlightNumber = values[1];
             LastName = values[2];
@@ -45,14 +26,22 @@ namespace TestWinFormsApp.Core.Classes
             MiddleName = values[4];
         }
 
-        private bool ValidateFlightNumber(string flightNumber)
+        public static bool Validate(params string[] values)
+        {
+            return values.Length >= 5 &&
+                DateTime.TryParse(values[0], out DateTime departureTime)&&
+                ValidateFlightNumber(values[1])&&
+                ValidatePassengerData(values[2], values[3], values[4]);
+        }
+
+        private static bool ValidateFlightNumber(string flightNumber)
         {
             string pattern = @"^[a-zA-Zа-яА-Я0-9]{3,}$";
 
             return Regex.IsMatch(flightNumber, pattern);
         }
 
-        private bool ValidatePassengerData(string lastName, string firstName, string middleName)
+        private static bool ValidatePassengerData(string lastName, string firstName, string middleName)
         {
             string pattern = @"^[a-zA-Zа-яА-Я]{2,}$";
 
@@ -63,7 +52,7 @@ namespace TestWinFormsApp.Core.Classes
 
         public object[] GetRow()
         {
-            return new object[] { DepartureTime, FlightNumber, LastName, FirstName, MiddleName };
+            return new object[] { DepartureTime.ToUniversalTime(), FlightNumber, LastName, FirstName, MiddleName };
         }
     }
 }

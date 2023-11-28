@@ -4,17 +4,19 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Resources;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TestWinFormsApp.Classes;
 using TestWinFormsApp.Core.Classes;
+using TestWinFormsApp.Properties;
 
 namespace TestWinFormsApp.Forms
 {
     public partial class MainForm : Form
     {
-        CSVReader<Passenger> reader;
+        CSVReader reader;
         PassengerReader passengers;
 
         public MainForm()
@@ -23,16 +25,14 @@ namespace TestWinFormsApp.Forms
             openFileDialog.Filter = "CSV Files (*.csv)|*.csv";
             openFileDialog.Multiselect = false;
 
-            reader = new CSVReader<Passenger>();
+            reader = new CSVReader();
             passengers = new(reader);
         }
 
         private void AboutMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Данный продукт реализует следующее тестовое задание:\n\n" +
-                "\tРазработать программу с формой вывода в табличном виде пассажиров рейса самолета с указанием времени вылета, номера рейса, ФИО пассажиров. Эти данные должны сохраняться в файле. При открытии файла таблица заполняется данными из файла." +
-                "\n\tСтек:  WinForms С# с использованием .Net 6.",
-                "О программе");
+            MessageBox.Show(Resources.About_Message,
+                Resources.About_Caption);
         }
 
         private void LoadDataMenuItem_Click(object sender, EventArgs e)
